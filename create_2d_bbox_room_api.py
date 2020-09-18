@@ -77,8 +77,10 @@ def main(args):
     else:
         max_workers = None
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
-        executor.map(export_bbox_json, list_segids, list_infos, itertools.repeat(dir_dst), itertools.repeat(create_viz),
-                     list_rgb)
+        for _ in executor.map(export_bbox_json, list_segids, list_infos, itertools.repeat(dir_dst),
+                              itertools.repeat(create_viz), list_rgb):
+            # Catch any error raised in processes
+            pass
 
 
 def export_bbox_json(file_segid, file_info_json, dst_dir, create_viz=False, file_rgb=None):
