@@ -15,8 +15,8 @@ Optionally, it can also output a visualization of the bounding boxes.
 
 ```bash
 python create_2d_bbox_room_api.py \
---src_dir images \
---dst_dir images \
+--src_dir samples \
+--dst_dir samples \
 --debug_viz_bbox_mask
 ```
 

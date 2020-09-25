@@ -3,6 +3,7 @@ import itertools
 import json
 import concurrent.futures
 import random
+from tqdm import tqdm
 from pathlib import Path
 
 import cv2
@@ -57,16 +58,23 @@ def main(args):
         raise ValueError(f"Mismatch in number of segmentindex and info files. These are the mismatching img numbers:\n"
                          f"{list(set(img_nums_segid) ^ set(img_nums_info))}")
 
-    print(f'Creating bounding boxes from {num_infos} files.')
+    print(f'Creating bounding boxes: ({SUFFIX_BBOX})\n'
+          f'  Num Info files found ({SUFFIX_INFO}): {num_infos}\n'
+          f'  Num Segments files found ({SUFFIX_SEGID}): {num_segids}\n'
+          f'  Output Dir: {dir_dst}\n')
 
     if args.debug_viz_bbox_mask:
         create_viz = True
-        print('Warning: debug visualizations enabled. This can be slow.')
         list_rgb = sorted(dir_src.glob('*' + SUFFIX_RGB))
         num_rgb = len(list_rgb)
         if num_segids != num_infos:
             print(f"Error: The number of RGB files ({num_rgb}) does not match"
                   f" the number of info files ({num_infos}).")
+
+        print(f'Creating bounding boxes visualizations ({SUFFIX_VIZ}).\n'
+              f'  Num RGB files found ({SUFFIX_RGB}): {num_rgb}\n'
+              f'  Output Dir: {dir_dst}\n'
+              f'  WARNING: This can be slow\n')
 
     else:
         create_viz = False
@@ -77,10 +85,11 @@ def main(args):
     else:
         max_workers = None
     with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
-        for _ in executor.map(export_bbox_json, list_segids, list_infos, itertools.repeat(dir_dst),
-                              itertools.repeat(create_viz), list_rgb):
-            # Catch any error raised in processes
-            pass
+        with tqdm(total=len(list_segids)) as pbar:
+            for _ in executor.map(export_bbox_json, list_segids, list_infos, itertools.repeat(dir_dst),
+                                  itertools.repeat(create_viz), list_rgb):
+                # Catch any error raised in processes
+                pbar.update()
 
 
 def export_bbox_json(file_segid, file_info_json, dst_dir, create_viz=False, file_rgb=None):
@@ -122,8 +131,7 @@ def export_bbox_json(file_segid, file_info_json, dst_dir, create_viz=False, file
 
         img_rgb = cv2.imread(str(file_rgb))
 
-    new_obj_dict = {}  # Stores info that will be output
-    new_obj_dict[JSON_OBJ_LIST_KEY] = []
+    new_obj_dict = {JSON_OBJ_LIST_KEY: []}  # Stores info that will be output
     random.seed(SEED_RANDOM)
     # Process all objects in the scene
     for obj in info[JSON_OBJ_LIST_KEY]:
@@ -151,14 +159,17 @@ def export_bbox_json(file_segid, file_info_json, dst_dir, create_viz=False, file
             cv2.rectangle(img_rgb, (x1, y1), (x2, y2), rand_color, 2)
 
     filename = dir_dst.joinpath(img_num_info + SUFFIX_BBOX)
-    print(f"Saving bbox json: {filename}")
+    # print(f"Saving bbox json: {filename}")
     with open(filename, 'w') as outfile:
         json.dump(new_obj_dict, outfile, indent=4)
 
     if create_viz:
         filename = dir_dst.joinpath(img_num_info + SUFFIX_VIZ)
-        print(f"Saving bbox viz: {filename}")
+        # print(f"Saving bbox viz: {filename}")
         cv2.imwrite(str(filename), img_rgb)
+
+    import time
+    time.sleep(1)
 
 
 if __name__ == "__main__":
