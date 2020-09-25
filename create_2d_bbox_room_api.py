@@ -71,6 +71,11 @@ def main(args):
         if num_rgb != num_infos:
             print(f"Error: The number of RGB files ({num_rgb}) does not match"
                   f" the number of info files ({num_infos}).")
+            img_nums_rgb = [_img.name[:-len(SUFFIX_RGB)] for _img in list_rgb]
+            img_nums_info = [_img.name[:-len(SUFFIX_INFO)] for _img in list_infos]
+            raise ValueError(
+                f"Mismatch in number of rgb and info files. These are the mismatching img numbers:\n"
+                f"{list(set(img_nums_rgb) ^ set(img_nums_info))}")
 
         print(f'Creating bounding boxes visualizations ({SUFFIX_VIZ}).\n'
               f'  Num RGB files found ({SUFFIX_RGB}): {num_rgb}\n'
