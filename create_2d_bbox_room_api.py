@@ -136,7 +136,7 @@ def export_bbox_json(file_segid, file_info_json, dst_dir, create_viz=False, file
     random.seed(SEED_RANDOM)
     # Process all objects in the scene
     for obj in info[JSON_OBJ_LIST_KEY]:
-        if JSON_HAZARD_IDENTIFIER_KEY in obj:
+        if JSON_HAZARD_IDENTIFIER_KEY not in obj:
             continue
 
         # Get ID of the object in the mask
