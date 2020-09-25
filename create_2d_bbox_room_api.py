@@ -80,7 +80,7 @@ def main(args):
         print(f'Creating bounding boxes visualizations ({SUFFIX_VIZ}).\n'
               f'  Num RGB files found ({SUFFIX_RGB}): {num_rgb}\n'
               f'  Output Dir: {dir_dst}\n'
-              f'  WARNING: This can be slow\n')
+              f'  WARNING: Creating visualizations can be slow\n')
 
     else:
         create_viz = False
@@ -141,6 +141,9 @@ def export_bbox_json(file_segid, file_info_json, dst_dir, create_viz=False, file
     random.seed(SEED_RANDOM)
     # Process all objects in the scene
     for obj in info[JSON_OBJ_LIST_KEY]:
+        # Static parts of the scene like walls and floor are also among the list of objects in the json.
+        # However, should ignore them. We filter them out based on the fact that they do not have
+        # parameters such as 'position'.
         if JSON_HAZARD_IDENTIFIER_KEY not in obj:
             continue
 
@@ -149,6 +152,9 @@ def export_bbox_json(file_segid, file_info_json, dst_dir, create_viz=False, file
 
         # Get mask of the object
         mask_obj = (segid == obj_id).astype(np.uint8)  # Convert bool to int
+        if np.count_nonzero(mask_obj) == 0:
+            # If mask is empty, skip this object
+            continue
 
         # Get bounding box from mask
         maskx = np.any(mask_obj, axis=0)
