@@ -42,8 +42,8 @@ def main(args):
     else:
         dir_dst = dir_src
 
-    list_infos = sorted(dir_src.glob('*' + SUFFIX_INFO))
-    list_segids = sorted(dir_src.glob('*' + SUFFIX_SEGID))
+    list_infos = list(sorted(dir_src.glob('*' + SUFFIX_INFO)))
+    list_segids = list(sorted(dir_src.glob('*' + SUFFIX_SEGID)))
     num_infos = len(list_infos)
     num_segids = len(list_segids)
     if num_infos < 1:
@@ -66,9 +66,9 @@ def main(args):
 
     if args.debug_viz_bbox_mask:
         create_viz = True
-        list_rgb = sorted(dir_src.glob('*' + SUFFIX_RGB))
+        list_rgb = list(sorted(dir_src.glob('*' + SUFFIX_RGB)))
         num_rgb = len(list_rgb)
-        if num_segids != num_infos:
+        if num_rgb != num_infos:
             print(f"Error: The number of RGB files ({num_rgb}) does not match"
                   f" the number of info files ({num_infos}).")
 
