@@ -13,8 +13,9 @@ import numpy as np
 SUFFIX_RGB = '.rgb.png'  # RGB image. Used to visualize the bounding boxes
 SUFFIX_SEGID = '.segments.png'
 SUFFIX_INFO = '.info.json'
-JSON_OBJ_ID_KEY = "mask_id"  # In json, this param contains the ID of the object in the mask
-JSON_OBJ_LIST_KEY = "objects"  # In json, this param contains list of the object
+JSON_OBJ_ID_KEY = 'mask_id'  # In json, this param contains the ID of the object in the mask
+JSON_OBJ_LIST_KEY = 'objects'  # In json, this param contains list of the object
+JSON_HAZARD_IDENTIFIER_KEY = 'position'  # Only hazards will have this param
 # Output
 SUFFIX_BBOX = '.bbox.json'
 SUFFIX_VIZ = '.bbox.jpg'  # Viz of bboxes on RGB image
@@ -135,6 +136,9 @@ def export_bbox_json(file_segid, file_info_json, dst_dir, create_viz=False, file
     random.seed(SEED_RANDOM)
     # Process all objects in the scene
     for obj in info[JSON_OBJ_LIST_KEY]:
+        if JSON_HAZARD_IDENTIFIER_KEY in obj:
+            continue
+
         # Get ID of the object in the mask
         obj_id = obj[JSON_OBJ_ID_KEY]
 
